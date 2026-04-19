@@ -1,0 +1,12 @@
+# Deny everything by default — new skills are private unless explicitly allowlisted below.
+/*
+
+# Keep repo essentials
+!/.gitignore
+!/README.md
+!/LICENSE
+
+# Published skills (add one !/skill-name/ line per skill you want to publish)
+!/grill-me/
+!/to-prd/
+!/audit/
