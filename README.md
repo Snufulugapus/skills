@@ -20,3 +20,7 @@ git clone https://github.com/Snufulugapus/skills ~/.claude/skills
 ## Tooling & Setup
 
 - **audit** — Full inventory of Claude Code config (plugins, MCP servers, agents, skills, commands, hooks) with update checks.
+
+## Content & Research
+
+- **youtube-transcript** — Fetch the transcript of a YouTube video or Short (via `yt-dlp`) and load it into the conversation for summarization, quoting, or analysis.
