@@ -1,11 +1,17 @@
 ---
 name: request-codex-review
-description: Use after Claude opens a PR to have Codex review the diff and post findings back to the PR. Verifies the Codex CLI is current before delegating; briefs the codex:codex-rescue agent so Codex itself never tries to access GitHub from inside its sandbox; posts a single structured comment with the standard AI-disclaimer prefix; verifies the comment landed before reporting success. Auto-trigger when Claude has just pushed a branch and run `gh pr create` (or after Spencer / a teammate has opened a PR you're about to review).
+description: Use after Claude opens a PR to have Codex run an adversarial review against the diff and post findings back to the PR. Codex is briefed to challenge the chosen implementation, design tradeoffs, and assumptions — not just hunt defects. Verifies the Codex CLI is current before delegating; briefs the codex:codex-rescue agent so Codex itself never tries to access GitHub from inside its sandbox; posts a single structured comment with the standard AI-disclaimer prefix; verifies the comment landed before reporting success. Auto-trigger when Claude has just pushed a branch and run `gh pr create` (or after Spencer / a teammate has opened a PR you're about to review).
 ---
 
 # request-codex-review
 
-Run a Codex code review against a specific PR and post the findings back to it. Returns when the review comment is verified live on the PR; does not triage — that's `triage-pr-review`'s job.
+Run an adversarial Codex review against a specific PR and post the findings back to it. Returns when the review comment is verified live on the PR; does not triage — that's `triage-pr-review`'s job.
+
+## Review framing (this is the whole point)
+
+Codex is briefed in a bad mood. The review is **not** "is the code clean?" — it's "is this the right approach, are the assumptions defensible, where does this design break under real-world conditions?" Implementation defects are still in scope, but they're not the priority. The priority is challenging the approach.
+
+This framing lives in Step 3's briefing and should not be softened.
 
 ## When to use
 
@@ -85,11 +91,20 @@ Invoke the agent with this brief structure:
 > 3. You (in your shell) post the findings to the PR via `gh pr review <PR#> --comment --body "..."` and verify the count went up.
 >
 > **Codex's prompt should include:**
+> - **Adversarial framing (top of the prompt, do not soften):** "Position this as a challenge review. Question the chosen implementation, design decisions, tradeoffs, and assumptions. This is not a stricter pass over implementation defects — your job is to argue with the design. For each significant choice, ask: is this the right approach? What assumption does it depend on? Where does it break under real-world conditions (concurrent users, host-header forgery, malicious input, partial failures, deployment-environment differences, schema drift over time)? If the approach is sound, say so explicitly — but the default stance is skepticism."
 > - The PR's stated scope (in/out per the PRD).
 > - The repo's locked decisions and "things to never do" from `CLAUDE.md`.
-> - Specific focus areas: correctness, security (auth/env/secrets), framework correctness (Next.js / Drizzle / Supabase / etc. as relevant), schema/migration hygiene, accessibility, scope contradictions vs PRD/CLAUDE.md.
+> - Focus areas, in this priority order:
+>   1. **Design / approach** — is the structural choice the right one? What other shape would this take? What's being given up?
+>   2. **Assumptions** — every place the code trusts an input, an environment, a header, a session, a state machine. Name them and stress them.
+>   3. **Failure modes under real conditions** — concurrency, partial failures, host/proto spoofing, account enumeration, race windows, replay, idempotency.
+>   4. **Security** (auth, env, secrets, RLS, redirect URLs, server/client leakage).
+>   5. **Framework correctness** (Next.js / Drizzle / Supabase / Stripe — whatever is in play).
+>   6. **Schema / migration hygiene** (FKs, RLS, indexes, idempotent triggers, rollback safety).
+>   7. **Scope contradictions vs PRD/CLAUDE.md** — flag anything that quietly violates a locked decision.
+>   8. Implementation defects (typos, lint, a11y) — last priority; mention but don't dwell.
 > - Instruction to ground every finding with `file:line` and a short code quote.
-> - Codex can call out good things, but priority is finding issues.
+> - **Do not list things that are good.** This is an adversarial review — positive callouts dilute the punch. If the design is sound, Codex can say so in one line at the end; the body is for challenges.
 >
 > **Output requirements:**
 > - Body must be prefixed with the literal string `**Codex review (delegated by Claude Code):**` — this is the AI disclaimer the triage skill uses to recognize the comment.
