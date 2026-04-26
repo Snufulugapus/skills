@@ -23,7 +23,7 @@ git clone https://github.com/Snufulugapus/skills ~/.claude/skills
 
 ## Code Review
 
-- **request-codex-review** — After Claude opens a PR, delegate an *adversarial* code review to the Codex CLI plugin and post findings back to the PR. Codex is briefed to challenge design choices, tradeoffs, and assumptions — not just hunt defects. Version-checks Codex first, briefs the rescue agent so Codex itself never tries to access GitHub from inside its sandbox, signs the comment with a `**Codex review (delegated by Claude Code):**` prefix.
+- **request-codex-review** — After Claude opens a PR, delegate a code review to the Codex CLI plugin and post findings back to the PR. Version-checks Codex first, briefs the rescue agent so Codex itself never tries to access GitHub from inside its sandbox, signs the comment with a `**Codex review (delegated by Claude Code):**` prefix. Defaults to a standard defects + scope review; supports an opt-in **adversarial** mode that has Codex challenge design choices and assumptions instead — useful for PRs that lock in load-bearing architecture, but overkill for routine implementation work.
 - **triage-pr-review** — Reviewer-agnostic triage for PR review findings (Codex, Claude self-review, human reviewers). Reads the project's calibration policy from `CLAUDE.md`. In calibration phase, summarizes findings and stops. In delegated phase, applies trivials within a strict allowlist, pushes back on findings that don't apply (with quoted code + reason), escalates judgment calls, and tracks deferred items in `docs/followups.md`. Never auto-fixes auth/billing/Stripe/security findings.
 
 ## Content & Research
