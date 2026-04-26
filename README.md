@@ -21,6 +21,11 @@ git clone https://github.com/Snufulugapus/skills ~/.claude/skills
 
 - **audit** — Full inventory of Claude Code config (plugins, MCP servers, agents, skills, commands, hooks) with update checks.
 
+## Code Review
+
+- **request-codex-review** — After Claude opens a PR, delegate review to the Codex CLI plugin and post findings back to the PR. Version-checks Codex first, briefs the rescue agent so Codex itself never tries to access GitHub from inside its sandbox, signs the comment with a `**Codex review (delegated by Claude Code):**` prefix.
+- **triage-pr-review** — Reviewer-agnostic triage for PR review findings (Codex, Claude self-review, human reviewers). Reads the project's calibration policy from `CLAUDE.md`. In calibration phase, summarizes findings and stops. In delegated phase, applies trivials within a strict allowlist, pushes back on findings that don't apply (with quoted code + reason), escalates judgment calls, and tracks deferred items in `docs/followups.md`. Never auto-fixes auth/billing/Stripe/security findings.
+
 ## Content & Research
 
 - **youtube-transcript** — Fetch the transcript of a YouTube video or Short (via `yt-dlp`) and load it into the conversation for summarization, quoting, or analysis.
